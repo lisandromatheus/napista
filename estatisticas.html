@@ -35,7 +35,7 @@
         <div class="bg-gray-800 p-5 rounded-b-3xl shadow-lg border-b border-gray-700 sticky top-0 z-30 flex items-center justify-between">
             <a href="index.html" class="text-gray-400 hover:text-white transition p-2"><i class="fa-solid fa-arrow-left text-xl"></i></a>
             <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-                <i class="fa-solid fa-fingerprint mr-2 text-purple-500"></i>Identity 4.0
+                <i class="fa-solid fa-fingerprint mr-2 text-purple-500"></i>Identity 5.0
             </h1>
             <div class="w-8"></div>
         </div>
@@ -63,7 +63,7 @@
                 <div class="text-center py-4 relative z-10 border-y border-white/10 my-2">
                     <span class="text-[9px] text-gray-400 uppercase tracking-[0.3em]">Arquétipo Dominante</span>
                     <h2 id="persona-title" class="text-3xl font-black profile-badge mt-1 mb-2 leading-tight uppercase">CALCULANDO...</h2>
-                    <p id="persona-desc" class="text-xs text-gray-300 italic font-light px-1">Coletando evidências...</p>
+                    <p id="persona-desc" class="text-xs text-gray-300 italic font-light px-1">Analisando vigência de contratos...</p>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 mt-4 relative z-10 text-center">
@@ -92,13 +92,13 @@
                 
                 <div class="space-y-3 text-sm text-gray-300">
                     <p id="diag-passion" class="leading-relaxed border-b border-gray-700 pb-2">
-                        <span class="text-gray-500 text-xs">❤️ Paixão:</span> <span class="italic">Analisando corações...</span>
+                        <span class="text-gray-500 text-xs">❤️ Foco Atual:</span> <span class="italic">Varrendo dados ativos...</span>
                     </p>
                     <p id="diag-type" class="leading-relaxed border-b border-gray-700 pb-2">
                         <span class="text-gray-500 text-xs">🧬 Seu Tipo:</span> <span class="italic">Analisando padrões...</span>
                     </p>
                     <p id="diag-performance" class="leading-relaxed">
-                        <span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="italic">Analisando performance...</span>
+                        <span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="italic">Analisando histórico...</span>
                     </p>
                 </div>
             </div>
@@ -107,14 +107,14 @@
         <div class="px-5 space-y-6 mt-6">
             
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
-                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-4 text-center tracking-widest">Raio-X do Elenco</h3>
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-4 text-center tracking-widest">Raio-X do Elenco (Histórico)</h3>
                 <div class="relative h-40 w-full flex justify-center">
                     <canvas id="chartCategories"></canvas>
                 </div>
             </div>
 
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
-                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">Fluxo de Caixa</h3>
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">Fluxo de Caixa Total</h3>
                 <p id="finance-msg" class="text-[10px] text-center text-pink-500 mb-4 italic font-bold">...</p>
                 <div class="relative h-32 w-full flex justify-center">
                     <canvas id="chartFinance"></canvas>
@@ -134,23 +134,36 @@
         const contacts = JSON.parse(localStorage.getItem(KEY_CONTACTS) || "[]");
         const events = JSON.parse(localStorage.getItem(KEY_EVENTS) || "[]");
 
-        // Helpers de Gênero
+        // Helpers
         const isFemale = user && (user.genero === 'Feminino');
         const term = (m, f) => isFemale ? f : m;
+
+        // --- FUNÇÃO AUXILIAR: VERIFICA SE O CONTRATO ESTÁ ATIVO ---
+        function isContactActive(c) {
+            // Se não tem data fim, é ativo (indeterminado)
+            if (!c.dataFim) return true;
+            
+            const today = new Date();
+            today.setHours(0,0,0,0); // Zera hora para comparar apenas data
+            
+            // Corrige fuso horário simples (considera a string YYYY-MM-DD)
+            const [y, m, d] = c.dataFim.split('-');
+            const endDate = new Date(y, m-1, d); // Mês é 0-indexed no JS
+            
+            return endDate >= today;
+        }
 
         window.onload = () => {
             if(!user) { window.location.href = 'index.html'; return; }
             
-            // Setup Básico
             document.getElementById('card-name').innerText = user.nome;
             document.getElementById('card-photo').src = user.foto;
 
-            // Executar Análises
             const stats = calculateStats();
             const diagnosis = runDeepDiagnosis(stats);
             const persona = determinePersona(stats, diagnosis);
             
-            renderPersona(persona, stats);
+            renderPersona(persona, stats, diagnosis);
             renderDiagnosis(diagnosis);
             renderCharts(stats);
         }
@@ -160,21 +173,17 @@
             const completed = events.filter(e => e.status === 'completed');
             const cancelled = events.filter(e => e.status === 'cancelled');
             
-            // Total de Encontros (Somando do histórico de eventos + contadores manuais dos contatos)
-            // Nota: Usamos o contador dos contatos como fonte da verdade para "passado" e eventos para "recente"
             let totalDates = 0;
             contacts.forEach(c => totalDates += (parseInt(c.encontros) || 0));
             
-            // Nota Média
             let totalStars = 0, countStars = 0;
             contacts.forEach(c => { if(c.rating > 0) { totalStars += parseInt(c.rating); countStars++; }});
             const avgRating = countStars > 0 ? (totalStars / countStars) : 0;
 
-            // Financeiro (Baseado em eventos)
             let payData = { 'Eu': 0, 'Dividido': 0, 'Ela': 0 };
             completed.forEach(e => { if(e.pay) payData[e.pay]++; });
 
-            // Dias desde o último
+            // Dias desde o último encontro (Geral)
             let daysSince = 999;
             if (completed.length > 0) {
                 const lastDate = completed.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time))[0];
@@ -185,7 +194,7 @@
             return { totalDates, avgRating, payData, daysSince, completed, cancelled };
         }
 
-        // --- 2. DIAGNÓSTICO PROFUNDO (DETETIVE) ---
+        // --- 2. DIAGNÓSTICO PROFUNDO (COM FILTRO DE ATIVIDADE) ---
         function runDeepDiagnosis(stats) {
             let diagnosis = {
                 passionName: null,
@@ -193,16 +202,25 @@
                 topPerformance: null
             };
 
-            // A. DETECTOR DE PAIXÃO
-            // Procura alguém com > 40% dos encontros totais (se tiver > 5 encontros no total)
-            if (stats.totalDates > 5) {
-                const lover = contacts.reduce((prev, current) => (prev.encontros > current.encontros) ? prev : current, {encontros:0});
-                if (lover.encontros >= 3 && lover.encontros >= (stats.totalDates * 0.4)) {
+            // A. DETECTOR DE PAIXÃO (SÓ CONTRATOS ATIVOS)
+            // Filtra apenas contatos cujo contrato NÃO VENCEU
+            const activeContacts = contacts.filter(isContactActive);
+            
+            if (stats.totalDates > 3 && activeContacts.length > 0) {
+                // Pega quem tem mais encontros dentre os ATIVOS
+                const lover = activeContacts.reduce((prev, current) => 
+                    ((parseInt(prev.encontros)||0) > (parseInt(current.encontros)||0)) ? prev : current, 
+                    {encontros: -1} // Valor inicial seguro
+                );
+
+                // Regra: Tem que ter pelo menos 3 encontros E representar uma boa fatia, mas o principal é ser ATIVO
+                // Se o lover.encontros for -1 significa que não achou ninguem ativo
+                if (lover.encontros >= 2) { 
                     diagnosis.passionName = lover.nome;
                 }
             }
 
-            // B. O "TIPO" (Tags mais comuns)
+            // B. O "TIPO" (Histórico Geral - Aqui conta todo mundo, pois é seu padrão de gosto)
             let tagCounts = {};
             contacts.forEach(c => {
                 if(c.tags) c.tags.forEach(t => tagCounts[t] = (tagCounts[t] || 0) + 1);
@@ -210,7 +228,7 @@
             let topTag = Object.keys(tagCounts).reduce((a, b) => tagCounts[a] > tagCounts[b] ? a : b, null);
             if(topTag && tagCounts[topTag] > 1) diagnosis.topType = topTag;
 
-            // C. PERFORMANCE (O que mais rola)
+            // C. PERFORMANCE (Histórico Geral)
             let perfCounts = {};
             contacts.forEach(c => {
                 if(c.performance && c.performance !== 'Ainda não rolou') 
@@ -222,79 +240,88 @@
             return diagnosis;
         }
 
-        // --- 3. DEFINIÇÃO DA PERSONA (20+ PERFIS) ---
+        // --- 3. DEFINIÇÃO DA PERSONA ---
         function determinePersona(stats, diag) {
             const { totalDates, daysSince, avgRating, payData, cancelled } = stats;
             const { passionName, topType, topPerformance } = diag;
 
-            // 1. OBSESSÃO AMOROSA
+            // 1. OBSESSÃO AMOROSA (Prioridade Máxima se estiver ATIVO)
             if (passionName) {
                 return { 
                     title: term("O APAIXONADO", "A APAIXONADA"), 
-                    desc: `Seus olhos só brilham para ${passionName}. O casamento sai quando?`
+                    desc: `Focado totalmente em ${passionName}. Os contatos antigos são apenas fantasmas agora.`
                 };
             }
 
-            // 2. PERFIL DE ALCOVA (Performance dominate)
-            if (topPerformance === 'Violenta' && totalDates > 3) return { title: "50 TONS", desc: "Curte adrenalina e intensidade. O chicote estrala!" };
-            if (topPerformance === 'Rápido' && totalDates > 3) return { title: "THE FLASH", desc: "Eficiência é seu lema. Vapt-vupt e tchau." };
+            // 2. RECÉM SOLTEIRO (Se teve muito volume mas a paixão não é ativa -> Vazio ou Expirado)
+            // Se tem muitos encontros recentes, mas ninguém ativo detectado como paixão
+            if (totalDates > 10 && daysSince > 10 && !passionName) {
+                return {
+                    title: "VIÚVO DO PASSADO",
+                    desc: "Teve muita ação, mas os contratos venceram. Momento de renovar o elenco."
+                };
+            }
+
+            // 3. PERFIL DE ALCOVA
+            if (topPerformance === 'Violenta' && totalDates > 3) return { title: "50 TONS", desc: "Intensidade máxima. Seus ex-contratos sabem bem..." };
+            if (topPerformance === 'Rápido' && totalDates > 3) return { title: "THE FLASH", desc: "Eficiência é seu lema. Vapt-vupt." };
             if (topPerformance === 'Demorado' && totalDates > 3) return { title: "TÂNTRICO", desc: "Sem pressa para acabar. Haja fôlego!" };
             if (topPerformance === 'Muito Bom' && totalDates > 3) return { title: "SHOWMAN", desc: "Entrega o que promete. Nota 10 na execução." };
 
-            // 3. PADRÃO DE PESSOA (O "Tipo")
-            if (topType === 'Surtada(o)' && contacts.length > 2) return { title: "PARA-RAIO DE LOUCO", desc: "Você tem um ímã para o caos. Paz não é contigo." };
+            // 4. PADRÃO DE PESSOA
+            if (topType === 'Surtada(o)' && contacts.length > 2) return { title: "PARA-RAIO DE LOUCO", desc: "Seu histórico prova: você ama o caos." };
             if (topType === 'Gente Boa' && contacts.length > 2) return { title: "BOM MOÇO", desc: "Só gente fina no currículo. Zero toxidade." };
             if (topType === 'Gamer' && contacts.length > 2) return { title: "PLAYER 1", desc: "O amor é só mais uma quest pra você upar." };
-            if (topType === 'Mãe de Pet' && contacts.length > 2) return { title: "PAI DE PET", desc: "Se não gostar de cachorro, nem entra na sua lista." };
 
-            // 4. ZERADO
+            // 5. ZERADO
             if (totalDates === 0) {
-                if (contacts.length > 5) return { title: "O ESPECULADOR", desc: "Muito contato salvo, zero ação. O mercado tá em baixa?" };
+                if (contacts.length > 5) return { title: "O ESPECULADOR", desc: "Muitos cadastros, zero ação. O mercado tá travado?" };
                 return { title: "RECRUTA ZERO", desc: "Começando a carreira agora. O mundo é seu!" };
             }
 
-            // 5. SECA
+            // 6. SECA
             if (daysSince > 60) return { title: "EREMITA", desc: "Isolado na montanha. Esqueceu como interage?" };
             if (daysSince > 30) return { title: "REI DA TEIA", desc: "As aranhas já alugaram seu coração. Reage!" };
 
-            // 6. ALTA RODAGEM
+            // 7. ALTA RODAGEM (Recente)
             if (daysSince <= 3 && totalDates > 10) return { title: term("PREDADOR", "PREDADORA"), desc: "Você está no topo da cadeia alimentar. Ninguém escapa." };
             if (daysSince <= 7) return { title: term("O POPSTAR", "A DIVA"), desc: "Agenda lotada, paparazzi na porta. Você é o momento." };
 
-            // 7. FINANCEIRO
+            // 8. FINANCEIRO
             let totalPay = payData['Eu'] + payData['Dividido'] + payData['Ela'];
             if (payData['Eu'] > totalPay * 0.8 && totalDates > 2) return { title: term("SUGAR DADDY", "SUGAR MOMMY"), desc: "Você banca o PIB do amor. A economia agradece." };
             if (payData['Ela'] > totalPay * 0.7 && totalDates > 2) return { title: term("GIGOLÔ", "GOLPE DO PIX"), desc: "Carteira blindada. Vive de amor e favor." };
-            if (payData['Dividido'] > totalPay * 0.8) return { title: "O CONTADOR", desc: "Calculadora na mão: 'Passa o pix da metade'." };
 
-            // 8. CRÍTICOS
+            // 9. CRÍTICOS
             if (avgRating >= 4.8 && totalDates > 3) return { title: "SOMMELIER", desc: "Padrão de qualidade altíssimo. Só aceita a elite." };
             if (avgRating <= 2.5 && totalDates > 2) return { title: "DEDO PODRE", desc: "Tem talento pra escolher errado. Vamos rever isso?" };
 
-            // 9. CATEGORIAS
+            // 10. CATEGORIAS
             if (contacts.filter(c => c.categoria === 'Marmita').length > 3) return { title: "REI DO IFOOD", desc: "Sempre tem um lanchinho de madrugada garantido." };
             if (contacts.filter(c => c.categoria === 'Ex').length > 2) return { title: "ARQUEÓLOGO", desc: "Adora desenterrar passado. Supera!" };
 
-            // GENÉRICOS
-            if (totalDates > 15) return { title: "VETERANO", desc: "Muitas batalhas, muitas histórias. Respeita a patente." };
+            // Default
             return { title: "EM TREINAMENTO", desc: "Coletando dados para definir sua real identidade." };
         }
 
         // --- RENDERIZADORES ---
         
-        function renderPersona(persona, stats) {
+        function renderPersona(persona, stats, diag) {
             document.getElementById('persona-title').innerText = persona.title;
             document.getElementById('persona-desc').innerText = persona.desc;
             document.getElementById('card-total').innerText = stats.totalDates;
             document.getElementById('card-rating').innerText = stats.avgRating.toFixed(1);
             
-            // Status Amor no Card
+            // Status Amor no Card (Logica Combinada)
             let loveStatus = "Livre";
-            if (stats.daysSince > 30) loveStatus = "Seca";
-            else if (stats.completed.length > 0 && stats.daysSince < 7) loveStatus = "Ativo";
-            // Se tiver paixão detectada no diagnóstico, muda o status
-            const diag = runDeepDiagnosis(stats);
-            if (diag.passionName) loveStatus = "Amando";
+            
+            if (diag.passionName) {
+                loveStatus = "Amando"; // Tem paixão ATIVA
+            } else if (stats.daysSince > 30) {
+                loveStatus = "Seca";
+            } else if (stats.completed.length > 0 && stats.daysSince < 7) {
+                loveStatus = "Na Pista";
+            }
             
             const loveEl = document.getElementById('card-love');
             loveEl.innerText = loveStatus;
@@ -305,30 +332,30 @@
             // Paixão
             const passEl = document.getElementById('diag-passion');
             if (diag.passionName) {
-                passEl.innerHTML = `<span class="text-pink-500 font-bold text-xs">❤️ Paixão Detectada:</span> <span class="text-white">Você está focado na <b>${diag.passionName}</b>. Cuidado pra não casar sem querer!</span>`;
+                passEl.innerHTML = `<span class="text-pink-500 font-bold text-xs">❤️ Foco Atual:</span> <span class="text-white">Seus esforços estão concentrados na <b>${diag.passionName}</b> (Contrato Ativo).</span>`;
             } else {
-                passEl.innerHTML = `<span class="text-gray-500 text-xs">❤️ Paixão:</span> <span class="text-gray-400">Coração livre (ou gelado). Ninguém se destacou ainda.</span>`;
+                passEl.innerHTML = `<span class="text-gray-500 text-xs">❤️ Foco Atual:</span> <span class="text-gray-400">Pulverizado. Ninguém ativo detém exclusividade do seu tempo.</span>`;
             }
 
             // Tipo
             const typeEl = document.getElementById('diag-type');
             if (diag.topType) {
-                typeEl.innerHTML = `<span class="text-purple-500 font-bold text-xs">🧬 Seu Tipo:</span> <span class="text-white">Você tem um fraco por <b>${diag.topType}s</b>. É um padrão claro!</span>`;
+                typeEl.innerHTML = `<span class="text-purple-500 font-bold text-xs">🧬 Seu Tipo:</span> <span class="text-white">Histórico mostra preferência por <b>${diag.topType}s</b>.</span>`;
             } else {
-                typeEl.innerHTML = `<span class="text-gray-500 text-xs">🧬 Seu Tipo:</span> <span class="text-gray-400">Eclético. Você atira para todos os lados.</span>`;
+                typeEl.innerHTML = `<span class="text-gray-500 text-xs">🧬 Seu Tipo:</span> <span class="text-gray-400">Sem padrão definido. Você é eclético(a).</span>`;
             }
 
             // Performance
             const perfEl = document.getElementById('diag-performance');
             if (diag.topPerformance) {
-                perfEl.innerHTML = `<span class="text-yellow-500 font-bold text-xs">🔥 Na Cama:</span> <span class="text-white">Seus encontros costumam ser <b>${diag.topPerformance}s</b>.</span>`;
+                perfEl.innerHTML = `<span class="text-yellow-500 font-bold text-xs">🔥 Na Cama:</span> <span class="text-white">A maioria dos relatos aponta: <b>${diag.topPerformance}</b>.</span>`;
             } else {
-                perfEl.innerHTML = `<span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="text-gray-400">Dados insuficientes para traçar perfil.</span>`;
+                perfEl.innerHTML = `<span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="text-gray-400">Dados insuficientes.</span>`;
             }
         }
 
         function renderCharts(stats) {
-            // -- Gráfico de Categorias --
+            // Categorias
             const categories = {};
             contacts.forEach(c => { categories[c.categoria] = (categories[c.categoria] || 0) + 1; });
             const catLabels = Object.keys(categories).length ? Object.keys(categories) : ['Vazio'];
@@ -348,15 +375,15 @@
                 }
             });
 
-            // -- Gráfico Financeiro --
+            // Financeiro
             const payData = stats.payData;
             const total = payData['Eu'] + payData['Dividido'] + payData['Ela'];
             const msgEl = document.getElementById('finance-msg');
             
             if(total === 0) msgEl.innerText = "Sem dados financeiros.";
-            else if(payData['Eu'] > total * 0.7) msgEl.innerText = term("Sugar Daddy Alert! 💸", "Sugar Mommy Alert! 💸");
-            else if(payData['Ela'] > total * 0.7) msgEl.innerText = "Vivendo de favor? Gain total! 🚀";
-            else msgEl.innerText = "Equilíbrio é tudo. ⚖️";
+            else if(payData['Eu'] > total * 0.7) msgEl.innerText = isFemale ? "Rainha da generosidade!" : "Carteira aberta, coração nobre.";
+            else if(payData['Ela'] > total * 0.7) msgEl.innerText = "Investimento externo alto.";
+            else msgEl.innerText = "Gestão equilibrada de recursos.";
 
             new Chart(document.getElementById('chartFinance'), {
                 type: 'bar',
