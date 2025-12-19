@@ -13,20 +13,18 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         body { background-color: #0f172a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
         
-        /* Efeito de Vidro para o Card Compartilhável */
+        /* Vidro Pro */
         .glass-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
         }
         
-        /* Animação do Badge */
-        .badge-pulse { animation: pulse-gold 2s infinite; }
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        .profile-badge {
+            background: linear-gradient(90deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
@@ -37,125 +35,146 @@
         <div class="bg-gray-800 p-5 rounded-b-3xl shadow-lg border-b border-gray-700 sticky top-0 z-30 flex items-center justify-between">
             <a href="index.html" class="text-gray-400 hover:text-white transition p-2"><i class="fa-solid fa-arrow-left text-xl"></i></a>
             <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-                <i class="fa-solid fa-fingerprint mr-2 text-purple-500"></i>Identity
+                <i class="fa-solid fa-fingerprint mr-2 text-purple-500"></i>Identity 4.0
             </h1>
             <div class="w-8"></div>
         </div>
 
         <div class="p-5 pb-2">
-            <p class="text-center text-[10px] text-gray-500 uppercase tracking-widest mb-3">Tire print e mostre quem você é</p>
+            <p class="text-center text-[10px] text-gray-500 uppercase tracking-widest mb-3">Sua carteirinha oficial</p>
             
-            <div id="share-card" class="glass-card rounded-3xl p-6 relative overflow-hidden group transition duration-500">
-                <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-600 rounded-full blur-3xl opacity-30"></div>
-                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-600 rounded-full blur-3xl opacity-30"></div>
+            <div id="share-card" class="glass-card rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-purple-600 rounded-full blur-[60px] opacity-20"></div>
+                <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-600 rounded-full blur-[60px] opacity-20"></div>
                 
                 <div class="flex items-center justify-between mb-6 relative z-10">
                     <div class="flex items-center">
-                        <img id="card-photo" src="" class="w-12 h-12 rounded-full border-2 border-white/30 shadow-lg object-cover">
+                        <img id="card-photo" src="" class="w-14 h-14 rounded-full border-2 border-white/20 shadow-lg object-cover">
                         <div class="ml-3">
-                            <h3 id="card-name" class="font-bold text-white text-lg leading-none shadow-black drop-shadow-md">Usuario</h3>
-                            <span class="text-[10px] text-pink-300 uppercase tracking-wider font-bold">Na Pista ®</span>
+                            <h3 id="card-name" class="font-bold text-white text-xl leading-none drop-shadow-md">Usuario</h3>
+                            <span class="text-[9px] text-pink-300 uppercase tracking-wider font-bold">Membro Oficial</span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <i class="fa-solid fa-ranking-star text-2xl text-yellow-400 drop-shadow-md"></i>
+                        <i class="fa-solid fa-id-card text-2xl text-white/20"></i>
                     </div>
                 </div>
 
                 <div class="text-center py-4 relative z-10 border-y border-white/10 my-2">
-                    <span class="text-[9px] text-gray-300 uppercase tracking-[0.3em]">Sua Vibe Atual</span>
-                    <h2 id="persona-title" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mt-1 mb-2 leading-tight">CALCULANDO...</h2>
-                    <p id="persona-desc" class="text-xs text-gray-200 italic font-light px-2">Analisando seus dados amorosos...</p>
+                    <span class="text-[9px] text-gray-400 uppercase tracking-[0.3em]">Arquétipo Dominante</span>
+                    <h2 id="persona-title" class="text-3xl font-black profile-badge mt-1 mb-2 leading-tight uppercase">CALCULANDO...</h2>
+                    <p id="persona-desc" class="text-xs text-gray-300 italic font-light px-1">Coletando evidências...</p>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 mt-4 relative z-10 text-center">
-                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
-                        <span class="block text-[18px] font-bold text-white" id="card-total">0</span>
-                        <span class="text-[8px] text-gray-400 uppercase">Encontros</span>
+                    <div class="bg-gray-900/40 rounded-lg p-2 backdrop-blur-md">
+                        <span class="block text-lg font-bold text-white" id="card-total">0</span>
+                        <span class="text-[8px] text-gray-400 uppercase tracking-wider">Jogos</span>
                     </div>
-                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
-                        <span class="block text-[18px] font-bold text-yellow-400" id="card-rating">0.0</span>
-                        <span class="text-[8px] text-gray-400 uppercase">Nota Média</span>
+                    <div class="bg-gray-900/40 rounded-lg p-2 backdrop-blur-md">
+                        <span class="block text-lg font-bold text-yellow-400" id="card-rating">0.0</span>
+                        <span class="text-[8px] text-gray-400 uppercase tracking-wider">Nota Média</span>
                     </div>
-                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
-                        <span class="block text-[18px] font-bold text-green-400" id="card-days">0</span>
-                        <span class="text-[8px] text-gray-400 uppercase">Dias Off</span>
+                    <div class="bg-gray-900/40 rounded-lg p-2 backdrop-blur-md">
+                        <span class="block text-lg font-bold text-green-400" id="card-love">?</span>
+                        <span class="text-[8px] text-gray-400 uppercase tracking-wider">Status Amor</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="px-5 space-y-6 mt-4">
+        <div class="px-5 mt-4">
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-pink-500"></div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> Diagnóstico Privado
+                </h3>
+                
+                <div class="space-y-3 text-sm text-gray-300">
+                    <p id="diag-passion" class="leading-relaxed border-b border-gray-700 pb-2">
+                        <span class="text-gray-500 text-xs">❤️ Paixão:</span> <span class="italic">Analisando corações...</span>
+                    </p>
+                    <p id="diag-type" class="leading-relaxed border-b border-gray-700 pb-2">
+                        <span class="text-gray-500 text-xs">🧬 Seu Tipo:</span> <span class="italic">Analisando padrões...</span>
+                    </p>
+                    <p id="diag-performance" class="leading-relaxed">
+                        <span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="italic">Analisando performance...</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-5 space-y-6 mt-6">
             
-            <div class="bg-gray-800 p-1 rounded-2xl border border-gray-700 shadow-lg">
-                <div class="flex items-center p-3">
-                    <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/30 text-yellow-500 mr-3">
-                        <i class="fa-solid fa-trophy"></i>
-                    </div>
-                    <div class="flex-1" id="mvp-container">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase">MVP da Temporada</h4>
-                        <p class="text-sm text-gray-600 italic">Ninguém elegível ainda.</p>
-                    </div>
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-4 text-center tracking-widest">Raio-X do Elenco</h3>
+                <div class="relative h-40 w-full flex justify-center">
+                    <canvas id="chartCategories"></canvas>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-5">
-                <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
-                    <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-4 text-center tracking-widest">O Elenco</h3>
-                    <div class="relative h-40 w-full flex justify-center">
-                        <canvas id="chartCategories"></canvas>
-                    </div>
-                </div>
-
-                <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
-                    <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">Economia do Amor</h3>
-                    <p id="finance-msg" class="text-[10px] text-center text-gray-500 mb-4 italic">...</p>
-                    <div class="relative h-32 w-full flex justify-center">
-                        <canvas id="chartFinance"></canvas>
-                    </div>
+            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">Fluxo de Caixa</h3>
+                <p id="finance-msg" class="text-[10px] text-center text-pink-500 mb-4 italic font-bold">...</p>
+                <div class="relative h-32 w-full flex justify-center">
+                    <canvas id="chartFinance"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONSTANTES ---
-        const APP_KEY_USER = 'napista_user';
-        const APP_KEY_CONTACTS = 'napista_contacts';
-        const APP_KEY_EVENTS = 'napista_events';
+        // --- CHAVES DO BANCO DE DADOS ---
+        const KEY_USER = 'napista_user';
+        const KEY_CONTACTS = 'napista_contacts';
+        const KEY_EVENTS = 'napista_events';
 
         // --- CARREGAMENTO ---
-        const user = JSON.parse(localStorage.getItem(APP_KEY_USER));
-        const contacts = JSON.parse(localStorage.getItem(APP_KEY_CONTACTS) || "[]");
-        const events = JSON.parse(localStorage.getItem(APP_KEY_EVENTS) || "[]");
+        const user = JSON.parse(localStorage.getItem(KEY_USER));
+        const contacts = JSON.parse(localStorage.getItem(KEY_CONTACTS) || "[]");
+        const events = JSON.parse(localStorage.getItem(KEY_EVENTS) || "[]");
 
-        // Gênero
+        // Helpers de Gênero
         const isFemale = user && (user.genero === 'Feminino');
-        const genderTerm = (male, female) => isFemale ? female : male;
+        const term = (m, f) => isFemale ? f : m;
 
         window.onload = () => {
             if(!user) { window.location.href = 'index.html'; return; }
             
-            // Renderizar Dados Básicos
+            // Setup Básico
             document.getElementById('card-name').innerText = user.nome;
             document.getElementById('card-photo').src = user.foto;
 
-            // Executar Lógicas
-            const persona = determinePersona();
-            renderPersonaCard(persona);
-            renderMVP();
-            renderCharts();
+            // Executar Análises
+            const stats = calculateStats();
+            const diagnosis = runDeepDiagnosis(stats);
+            const persona = determinePersona(stats, diagnosis);
+            
+            renderPersona(persona, stats);
+            renderDiagnosis(diagnosis);
+            renderCharts(stats);
         }
 
-        // --- A MÁGICA: MOTOR DE PERFIL (20 PERFIS) ---
-        function determinePersona() {
+        // --- 1. ESTATÍSTICAS BASE ---
+        function calculateStats() {
             const completed = events.filter(e => e.status === 'completed');
             const cancelled = events.filter(e => e.status === 'cancelled');
             
-            // Dados calculados
-            const totalDates = completed.length;
+            // Total de Encontros (Somando do histórico de eventos + contadores manuais dos contatos)
+            // Nota: Usamos o contador dos contatos como fonte da verdade para "passado" e eventos para "recente"
+            let totalDates = 0;
+            contacts.forEach(c => totalDates += (parseInt(c.encontros) || 0));
             
-            // Dias desde o último date
+            // Nota Média
+            let totalStars = 0, countStars = 0;
+            contacts.forEach(c => { if(c.rating > 0) { totalStars += parseInt(c.rating); countStars++; }});
+            const avgRating = countStars > 0 ? (totalStars / countStars) : 0;
+
+            // Financeiro (Baseado em eventos)
+            let payData = { 'Eu': 0, 'Dividido': 0, 'Ela': 0 };
+            completed.forEach(e => { if(e.pay) payData[e.pay]++; });
+
+            // Dias desde o último
             let daysSince = 999;
             if (completed.length > 0) {
                 const lastDate = completed.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time))[0];
@@ -163,160 +182,155 @@
                 daysSince = Math.floor(diff / (1000 * 60 * 60 * 24));
             }
 
-            // Nota Média
-            let totalStars = 0, countStars = 0;
-            contacts.forEach(c => { if(c.rating > 0) { totalStars += parseInt(c.rating); countStars++; }});
-            const avgRating = countStars > 0 ? (totalStars / countStars) : 0;
+            return { totalDates, avgRating, payData, daysSince, completed, cancelled };
+        }
 
-            // Financeiro
-            let paidByMe = 0, split = 0, paidByThem = 0;
-            completed.forEach(e => {
-                if(e.pay === 'Eu') paidByMe++;
-                else if(e.pay === 'Dividido') split++;
-                else if(e.pay === 'Ela') paidByThem++;
+        // --- 2. DIAGNÓSTICO PROFUNDO (DETETIVE) ---
+        function runDeepDiagnosis(stats) {
+            let diagnosis = {
+                passionName: null,
+                topType: null,
+                topPerformance: null
+            };
+
+            // A. DETECTOR DE PAIXÃO
+            // Procura alguém com > 40% dos encontros totais (se tiver > 5 encontros no total)
+            if (stats.totalDates > 5) {
+                const lover = contacts.reduce((prev, current) => (prev.encontros > current.encontros) ? prev : current, {encontros:0});
+                if (lover.encontros >= 3 && lover.encontros >= (stats.totalDates * 0.4)) {
+                    diagnosis.passionName = lover.nome;
+                }
+            }
+
+            // B. O "TIPO" (Tags mais comuns)
+            let tagCounts = {};
+            contacts.forEach(c => {
+                if(c.tags) c.tags.forEach(t => tagCounts[t] = (tagCounts[t] || 0) + 1);
             });
+            let topTag = Object.keys(tagCounts).reduce((a, b) => tagCounts[a] > tagCounts[b] ? a : b, null);
+            if(topTag && tagCounts[topTag] > 1) diagnosis.topType = topTag;
 
-            // Atualiza números no card
-            document.getElementById('card-total').innerText = totalDates;
-            document.getElementById('card-rating').innerText = avgRating.toFixed(1);
-            document.getElementById('card-days').innerText = (daysSince === 999) ? '-' : daysSince;
+            // C. PERFORMANCE (O que mais rola)
+            let perfCounts = {};
+            contacts.forEach(c => {
+                if(c.performance && c.performance !== 'Ainda não rolou') 
+                    perfCounts[c.performance] = (perfCounts[c.performance] || 0) + 1;
+            });
+            let topPerf = Object.keys(perfCounts).reduce((a, b) => perfCounts[a] > perfCounts[b] ? a : b, null);
+            if(topPerf) diagnosis.topPerformance = topPerf;
 
-            // --- ARVORE DE DECISÃO DOS 20 PERFIS ---
+            return diagnosis;
+        }
 
-            // 1. Caso ZERADO (Sem dates)
-            if (totalDates === 0) {
-                if (contacts.length > 5) return { 
-                    title: genderTerm("O ILUDIDO", "A ILUDIDA"), 
-                    desc: "Muitos contatos salvos, zero atitude. O famoso 'só converso'." 
-                };
+        // --- 3. DEFINIÇÃO DA PERSONA (20+ PERFIS) ---
+        function determinePersona(stats, diag) {
+            const { totalDates, daysSince, avgRating, payData, cancelled } = stats;
+            const { passionName, topType, topPerformance } = diag;
+
+            // 1. OBSESSÃO AMOROSA
+            if (passionName) {
                 return { 
-                    title: genderTerm("O ESTAGIÁRIO", "A ESTAGIÁRIA"), 
-                    desc: "Começando agora. A carteira de trabalho ainda tá vazia." 
+                    title: term("O APAIXONADO", "A APAIXONADA"), 
+                    desc: `Seus olhos só brilham para ${passionName}. O casamento sai quando?`
                 };
             }
 
-            // 2. Casos de SECA (Muito tempo sem sair)
-            if (daysSince > 60) return { 
-                title: genderTerm("O EREMITA", "A EREMITA"), 
-                desc: "Dois meses sem ver a luz do sol. Você ainda lembra como beija?" 
-            };
-            if (daysSince > 30) return { 
-                title: "REI DA TEIA", 
-                desc: "As aranhas já estão pagando aluguel aí. Bora reagir!" 
-            };
+            // 2. PERFIL DE ALCOVA (Performance dominate)
+            if (topPerformance === 'Violenta' && totalDates > 3) return { title: "50 TONS", desc: "Curte adrenalina e intensidade. O chicote estrala!" };
+            if (topPerformance === 'Rápido' && totalDates > 3) return { title: "THE FLASH", desc: "Eficiência é seu lema. Vapt-vupt e tchau." };
+            if (topPerformance === 'Demorado' && totalDates > 3) return { title: "TÂNTRICO", desc: "Sem pressa para acabar. Haja fôlego!" };
+            if (topPerformance === 'Muito Bom' && totalDates > 3) return { title: "SHOWMAN", desc: "Entrega o que promete. Nota 10 na execução." };
 
-            // 3. Casos de ALTA PERFORMANCE (Recente e frequente)
-            if (daysSince <= 2 && totalDates > 5) return { 
-                title: genderTerm("A MÁQUINA", "A MÁQUINA"), 
-                desc: "Você não cansa? Haja energia e orçamento pra esse ritmo!" 
-            };
-            if (daysSince <= 7) return { 
-                title: genderTerm("O POPSTAR", "A DIVA"), 
-                desc: "Agenda lotada, paparazzi na porta. Você é o momento." 
-            };
+            // 3. PADRÃO DE PESSOA (O "Tipo")
+            if (topType === 'Surtada(o)' && contacts.length > 2) return { title: "PARA-RAIO DE LOUCO", desc: "Você tem um ímã para o caos. Paz não é contigo." };
+            if (topType === 'Gente Boa' && contacts.length > 2) return { title: "BOM MOÇO", desc: "Só gente fina no currículo. Zero toxidade." };
+            if (topType === 'Gamer' && contacts.length > 2) return { title: "PLAYER 1", desc: "O amor é só mais uma quest pra você upar." };
+            if (topType === 'Mãe de Pet' && contacts.length > 2) return { title: "PAI DE PET", desc: "Se não gostar de cachorro, nem entra na sua lista." };
 
-            // 4. Perfis FINANCEIROS
-            if (paidByMe > (totalDates * 0.8) && totalDates > 2) return { 
-                title: genderTerm("SUGAR DADDY", "SUGAR MOMMY"), 
-                desc: "Você banca tudo. O PIB do amor depende de você." 
-            };
-            if (paidByThem > (totalDates * 0.7) && totalDates > 2) return { 
-                title: genderTerm("GIGOLÔ", "GOLPE DO PIX"), 
-                desc: "Sair com você é gain total. Carteira intacta, coração cheio." 
-            };
-            if (split > (totalDates * 0.8)) return { 
-                title: genderTerm("O CONTADOR", "A CONTADORA"), 
-                desc: "Calculadora na mão. 'Faz o pix da sua metade aí'." 
-            };
+            // 4. ZERADO
+            if (totalDates === 0) {
+                if (contacts.length > 5) return { title: "O ESPECULADOR", desc: "Muito contato salvo, zero ação. O mercado tá em baixa?" };
+                return { title: "RECRUTA ZERO", desc: "Começando a carreira agora. O mundo é seu!" };
+            }
 
-            // 5. Perfis por QUALIDADE (Rating)
-            if (avgRating >= 4.5 && totalDates > 3) return { 
-                title: "SOMMELIER DE BOCA", 
-                desc: "Padrão de qualidade altíssimo. Só aceita a elite." 
-            };
-            if (avgRating <= 2.0 && totalDates > 2) return { 
-                title: "PARA-RAIO DE LOUCO", 
-                desc: "Você tem um ímã para gente problemática. Cuidado!" 
-            };
+            // 5. SECA
+            if (daysSince > 60) return { title: "EREMITA", desc: "Isolado na montanha. Esqueceu como interage?" };
+            if (daysSince > 30) return { title: "REI DA TEIA", desc: "As aranhas já alugaram seu coração. Reage!" };
 
-            // 6. Perfis por CANCELAMENTO
-            if (cancelled.length > completed.length) return { 
-                title: genderTerm("O FURÃO", "A FUGITIVA"), 
-                desc: "Marca e não vai. O terror dos Ubers." 
-            };
+            // 6. ALTA RODAGEM
+            if (daysSince <= 3 && totalDates > 10) return { title: term("PREDADOR", "PREDADORA"), desc: "Você está no topo da cadeia alimentar. Ninguém escapa." };
+            if (daysSince <= 7) return { title: term("O POPSTAR", "A DIVA"), desc: "Agenda lotada, paparazzi na porta. Você é o momento." };
 
-            // 7. Perfis por CATEGORIA/CONTRATO
-            const uniqueContacts = new Set(completed.map(e => e.contactId)).size;
-            
-            if (uniqueContacts === 1 && totalDates > 5) return { 
-                title: genderTerm("O APAIXONADO", "A APAIXONADA"), 
-                desc: "Fiel a uma pessoa só. O casamento tá logo ali?" 
-            };
-            
-            if (uniqueContacts > 5 && (totalDates / uniqueContacts) < 2) return { 
-                title: genderTerm("O DEGUSTADOR", "A DEGUSTADORA"), 
-                desc: "Experimenta de tudo, mas não repete o prato." 
-            };
+            // 7. FINANCEIRO
+            let totalPay = payData['Eu'] + payData['Dividido'] + payData['Ela'];
+            if (payData['Eu'] > totalPay * 0.8 && totalDates > 2) return { title: term("SUGAR DADDY", "SUGAR MOMMY"), desc: "Você banca o PIB do amor. A economia agradece." };
+            if (payData['Ela'] > totalPay * 0.7 && totalDates > 2) return { title: term("GIGOLÔ", "GOLPE DO PIX"), desc: "Carteira blindada. Vive de amor e favor." };
+            if (payData['Dividido'] > totalPay * 0.8) return { title: "O CONTADOR", desc: "Calculadora na mão: 'Passa o pix da metade'." };
 
-            // 8. Perfis Específicos
-            if (contacts.filter(c => c.categoria === 'Marmita').length > 3) return {
-                title: genderTerm("REI DO IFOOD", "RAINHA DO IFOOD"),
-                desc: "Mantém vários na reserva pra quando bate a fome."
-            };
+            // 8. CRÍTICOS
+            if (avgRating >= 4.8 && totalDates > 3) return { title: "SOMMELIER", desc: "Padrão de qualidade altíssimo. Só aceita a elite." };
+            if (avgRating <= 2.5 && totalDates > 2) return { title: "DEDO PODRE", desc: "Tem talento pra escolher errado. Vamos rever isso?" };
 
-            if (contacts.filter(c => c.categoria === 'Ex').length > 2) return {
-                title: "O ARQUEÓLOGO",
-                desc: "Adora desenterrar passado. Supera isso aí!"
-            };
+            // 9. CATEGORIAS
+            if (contacts.filter(c => c.categoria === 'Marmita').length > 3) return { title: "REI DO IFOOD", desc: "Sempre tem um lanchinho de madrugada garantido." };
+            if (contacts.filter(c => c.categoria === 'Ex').length > 2) return { title: "ARQUEÓLOGO", desc: "Adora desenterrar passado. Supera!" };
 
-            // Perfis Genéricos/Equilibrados
-            if (totalDates > 15) return { 
-                title: "VETERANO DE GUERRA", 
-                desc: "Já viu de tudo nessa vida. Respeita a patente." 
-            };
-            
-            if (totalDates > 5) return { 
-                title: "JOGADOR CARO", 
-                desc: "Tá na média, jogando o feijão com arroz bem feito." 
-            };
-
-            // Default
-            return { 
-                title: "EM TREINAMENTO", 
-                desc: "Coletando dados para definir sua personalidade." 
-            };
+            // GENÉRICOS
+            if (totalDates > 15) return { title: "VETERANO", desc: "Muitas batalhas, muitas histórias. Respeita a patente." };
+            return { title: "EM TREINAMENTO", desc: "Coletando dados para definir sua real identidade." };
         }
 
-        function renderPersonaCard(persona) {
+        // --- RENDERIZADORES ---
+        
+        function renderPersona(persona, stats) {
             document.getElementById('persona-title').innerText = persona.title;
             document.getElementById('persona-desc').innerText = persona.desc;
+            document.getElementById('card-total').innerText = stats.totalDates;
+            document.getElementById('card-rating').innerText = stats.avgRating.toFixed(1);
+            
+            // Status Amor no Card
+            let loveStatus = "Livre";
+            if (stats.daysSince > 30) loveStatus = "Seca";
+            else if (stats.completed.length > 0 && stats.daysSince < 7) loveStatus = "Ativo";
+            // Se tiver paixão detectada no diagnóstico, muda o status
+            const diag = runDeepDiagnosis(stats);
+            if (diag.passionName) loveStatus = "Amando";
+            
+            const loveEl = document.getElementById('card-love');
+            loveEl.innerText = loveStatus;
+            loveEl.className = `block text-lg font-bold ${loveStatus === 'Seca' ? 'text-red-400' : (loveStatus === 'Amando' ? 'text-pink-400' : 'text-green-400')}`;
         }
 
-        // --- 2. RENDERIZAR MVP ---
-        function renderMVP() {
-            if (contacts.length === 0) return;
-            const sorted = [...contacts].sort((a, b) => (b.encontros || 0) - (a.encontros || 0));
-            const mvp = sorted[0];
-
-            if (!mvp.encontros || mvp.encontros == 0) {
-                document.getElementById('mvp-container').innerHTML = `<p class="text-xs text-gray-500">Sem MVP definido.</p>`;
-                return;
+        function renderDiagnosis(diag) {
+            // Paixão
+            const passEl = document.getElementById('diag-passion');
+            if (diag.passionName) {
+                passEl.innerHTML = `<span class="text-pink-500 font-bold text-xs">❤️ Paixão Detectada:</span> <span class="text-white">Você está focado na <b>${diag.passionName}</b>. Cuidado pra não casar sem querer!</span>`;
+            } else {
+                passEl.innerHTML = `<span class="text-gray-500 text-xs">❤️ Paixão:</span> <span class="text-gray-400">Coração livre (ou gelado). Ninguém se destacou ainda.</span>`;
             }
 
-            document.getElementById('mvp-container').innerHTML = `
-                <div class="flex justify-between items-center">
-                    <h4 class="text-white font-bold text-sm">${mvp.nome}</h4>
-                    <span class="text-[10px] text-yellow-500 font-bold border border-yellow-500/30 px-2 rounded">TOP 1</span>
-                </div>
-                <p class="text-[10px] text-gray-400 mt-1">${mvp.encontros} Encontros | Nota: ${mvp.rating}</p>
-            `;
+            // Tipo
+            const typeEl = document.getElementById('diag-type');
+            if (diag.topType) {
+                typeEl.innerHTML = `<span class="text-purple-500 font-bold text-xs">🧬 Seu Tipo:</span> <span class="text-white">Você tem um fraco por <b>${diag.topType}s</b>. É um padrão claro!</span>`;
+            } else {
+                typeEl.innerHTML = `<span class="text-gray-500 text-xs">🧬 Seu Tipo:</span> <span class="text-gray-400">Eclético. Você atira para todos os lados.</span>`;
+            }
+
+            // Performance
+            const perfEl = document.getElementById('diag-performance');
+            if (diag.topPerformance) {
+                perfEl.innerHTML = `<span class="text-yellow-500 font-bold text-xs">🔥 Na Cama:</span> <span class="text-white">Seus encontros costumam ser <b>${diag.topPerformance}s</b>.</span>`;
+            } else {
+                perfEl.innerHTML = `<span class="text-gray-500 text-xs">🔥 Na Cama:</span> <span class="text-gray-400">Dados insuficientes para traçar perfil.</span>`;
+            }
         }
 
-        // --- 3. GRÁFICOS ---
-        function renderCharts() {
+        function renderCharts(stats) {
+            // -- Gráfico de Categorias --
             const categories = {};
             contacts.forEach(c => { categories[c.categoria] = (categories[c.categoria] || 0) + 1; });
-
             const catLabels = Object.keys(categories).length ? Object.keys(categories) : ['Vazio'];
             const catData = Object.keys(categories).length ? Object.values(categories) : [1];
             const catColors = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b'];
@@ -334,19 +348,15 @@
                 }
             });
 
-            // Financeiro
-            let payData = { 'Eu': 0, 'Dividido': 0, 'Ela': 0 };
-            events.filter(e => e.status === 'completed').forEach(e => {
-                if(e.pay) payData[e.pay] = (payData[e.pay] || 0) + 1;
-            });
-
-            // Mensagem Financeira
-            const msgEl = document.getElementById('finance-msg');
+            // -- Gráfico Financeiro --
+            const payData = stats.payData;
             const total = payData['Eu'] + payData['Dividido'] + payData['Ela'];
-            if(total === 0) msgEl.innerText = "Sem dados.";
-            else if(payData['Eu'] > total * 0.7) msgEl.innerText = isFemale ? "Rainha da generosidade!" : "A carteira chora, o coração sorri.";
-            else if(payData['Ela'] > total * 0.7) msgEl.innerText = "Vivendo de favor ou de amor?";
-            else msgEl.innerText = "Equilíbrio financeiro perfeito.";
+            const msgEl = document.getElementById('finance-msg');
+            
+            if(total === 0) msgEl.innerText = "Sem dados financeiros.";
+            else if(payData['Eu'] > total * 0.7) msgEl.innerText = term("Sugar Daddy Alert! 💸", "Sugar Mommy Alert! 💸");
+            else if(payData['Ela'] > total * 0.7) msgEl.innerText = "Vivendo de favor? Gain total! 🚀";
+            else msgEl.innerText = "Equilíbrio é tudo. ⚖️";
 
             new Chart(document.getElementById('chartFinance'), {
                 type: 'bar',
@@ -369,11 +379,6 @@
                     plugins: { legend: { display: false } }
                 }
             });
-        }
-
-        // --- 4. INSIGHTS ---
-        function calculateInsights() {
-            /* (Lógica já incorporada no determinePersona) */
         }
     </script>
 </body>
