@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1709823,
+    "nome": "Jessica do Marketing",
+    "status": "Ficante Premium", 
+    "avaliacao": 5, 
+    "caracteristicas": ["Loira", "Gente boa", "Fitness"],
+    "idade": 24,
+    "foto": "data:image...",
+    "notas": "Gosta de sushi, não falar de política.",
+    "dataEncontro": "2025-12-10"
+  }
+]

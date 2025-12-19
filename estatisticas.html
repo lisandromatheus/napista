@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Na Pista - Identity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        body { background-color: #0f172a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Efeito de Vidro para o Card Compartilhável */
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        /* Animação do Badge */
+        .badge-pulse { animation: pulse-gold 2s infinite; }
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen relative pb-10 bg-gray-900 selection:bg-pink-500 selection:text-white">
+
+    <div class="max-w-md mx-auto min-h-screen bg-gray-900 shadow-2xl relative fade-in">
+        
+        <div class="bg-gray-800 p-5 rounded-b-3xl shadow-lg border-b border-gray-700 sticky top-0 z-30 flex items-center justify-between">
+            <a href="index.html" class="text-gray-400 hover:text-white transition p-2"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                <i class="fa-solid fa-fingerprint mr-2 text-purple-500"></i>Identity
+            </h1>
+            <div class="w-8"></div>
+        </div>
+
+        <div class="p-5 pb-2">
+            <p class="text-center text-[10px] text-gray-500 uppercase tracking-widest mb-3">Tire print e mostre quem você é</p>
+            
+            <div id="share-card" class="glass-card rounded-3xl p-6 relative overflow-hidden group transition duration-500">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-600 rounded-full blur-3xl opacity-30"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-600 rounded-full blur-3xl opacity-30"></div>
+                
+                <div class="flex items-center justify-between mb-6 relative z-10">
+                    <div class="flex items-center">
+                        <img id="card-photo" src="" class="w-12 h-12 rounded-full border-2 border-white/30 shadow-lg object-cover">
+                        <div class="ml-3">
+                            <h3 id="card-name" class="font-bold text-white text-lg leading-none shadow-black drop-shadow-md">Usuario</h3>
+                            <span class="text-[10px] text-pink-300 uppercase tracking-wider font-bold">Na Pista ®</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <i class="fa-solid fa-ranking-star text-2xl text-yellow-400 drop-shadow-md"></i>
+                    </div>
+                </div>
+
+                <div class="text-center py-4 relative z-10 border-y border-white/10 my-2">
+                    <span class="text-[9px] text-gray-300 uppercase tracking-[0.3em]">Sua Vibe Atual</span>
+                    <h2 id="persona-title" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mt-1 mb-2 leading-tight">CALCULANDO...</h2>
+                    <p id="persona-desc" class="text-xs text-gray-200 italic font-light px-2">Analisando seus dados amorosos...</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 mt-4 relative z-10 text-center">
+                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+                        <span class="block text-[18px] font-bold text-white" id="card-total">0</span>
+                        <span class="text-[8px] text-gray-400 uppercase">Encontros</span>
+                    </div>
+                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+                        <span class="block text-[18px] font-bold text-yellow-400" id="card-rating">0.0</span>
+                        <span class="text-[8px] text-gray-400 uppercase">Nota Média</span>
+                    </div>
+                    <div class="bg-black/20 rounded-lg p-2 backdrop-blur-sm">
+                        <span class="block text-[18px] font-bold text-green-400" id="card-days">0</span>
+                        <span class="text-[8px] text-gray-400 uppercase">Dias Off</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-5 space-y-6 mt-4">
+            
+            <div class="bg-gray-800 p-1 rounded-2xl border border-gray-700 shadow-lg">
+                <div class="flex items-center p-3">
+                    <div class="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/30 text-yellow-500 mr-3">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div class="flex-1" id="mvp-container">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase">MVP da Temporada</h4>
+                        <p class="text-sm text-gray-600 italic">Ninguém elegível ainda.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5">
+                <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-4 text-center tracking-widest">O Elenco</h3>
+                    <div class="relative h-40 w-full flex justify-center">
+                        <canvas id="chartCategories"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg">
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">Economia do Amor</h3>
+                    <p id="finance-msg" class="text-[10px] text-center text-gray-500 mb-4 italic">...</p>
+                    <div class="relative h-32 w-full flex justify-center">
+                        <canvas id="chartFinance"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTES ---
+        const APP_KEY_USER = 'napista_user';
+        const APP_KEY_CONTACTS = 'napista_contacts';
+        const APP_KEY_EVENTS = 'napista_events';
+
+        // --- CARREGAMENTO ---
+        const user = JSON.parse(localStorage.getItem(APP_KEY_USER));
+        const contacts = JSON.parse(localStorage.getItem(APP_KEY_CONTACTS) || "[]");
+        const events = JSON.parse(localStorage.getItem(APP_KEY_EVENTS) || "[]");
+
+        // Gênero
+        const isFemale = user && (user.genero === 'Feminino');
+        const genderTerm = (male, female) => isFemale ? female : male;
+
+        window.onload = () => {
+            if(!user) { window.location.href = 'index.html'; return; }
+            
+            // Renderizar Dados Básicos
+            document.getElementById('card-name').innerText = user.nome;
+            document.getElementById('card-photo').src = user.foto;
+
+            // Executar Lógicas
+            const persona = determinePersona();
+            renderPersonaCard(persona);
+            renderMVP();
+            renderCharts();
+        }
+
+        // --- A MÁGICA: MOTOR DE PERFIL (20 PERFIS) ---
+        function determinePersona() {
+            const completed = events.filter(e => e.status === 'completed');
+            const cancelled = events.filter(e => e.status === 'cancelled');
+            
+            // Dados calculados
+            const totalDates = completed.length;
+            
+            // Dias desde o último date
+            let daysSince = 999;
+            if (completed.length > 0) {
+                const lastDate = completed.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time))[0];
+                const diff = new Date() - new Date(lastDate.date + 'T' + lastDate.time);
+                daysSince = Math.floor(diff / (1000 * 60 * 60 * 24));
+            }
+
+            // Nota Média
+            let totalStars = 0, countStars = 0;
+            contacts.forEach(c => { if(c.rating > 0) { totalStars += parseInt(c.rating); countStars++; }});
+            const avgRating = countStars > 0 ? (totalStars / countStars) : 0;
+
+            // Financeiro
+            let paidByMe = 0, split = 0, paidByThem = 0;
+            completed.forEach(e => {
+                if(e.pay === 'Eu') paidByMe++;
+                else if(e.pay === 'Dividido') split++;
+                else if(e.pay === 'Ela') paidByThem++;
+            });
+
+            // Atualiza números no card
+            document.getElementById('card-total').innerText = totalDates;
+            document.getElementById('card-rating').innerText = avgRating.toFixed(1);
+            document.getElementById('card-days').innerText = (daysSince === 999) ? '-' : daysSince;
+
+            // --- ARVORE DE DECISÃO DOS 20 PERFIS ---
+
+            // 1. Caso ZERADO (Sem dates)
+            if (totalDates === 0) {
+                if (contacts.length > 5) return { 
+                    title: genderTerm("O ILUDIDO", "A ILUDIDA"), 
+                    desc: "Muitos contatos salvos, zero atitude. O famoso 'só converso'." 
+                };
+                return { 
+                    title: genderTerm("O ESTAGIÁRIO", "A ESTAGIÁRIA"), 
+                    desc: "Começando agora. A carteira de trabalho ainda tá vazia." 
+                };
+            }
+
+            // 2. Casos de SECA (Muito tempo sem sair)
+            if (daysSince > 60) return { 
+                title: genderTerm("O EREMITA", "A EREMITA"), 
+                desc: "Dois meses sem ver a luz do sol. Você ainda lembra como beija?" 
+            };
+            if (daysSince > 30) return { 
+                title: "REI DA TEIA", 
+                desc: "As aranhas já estão pagando aluguel aí. Bora reagir!" 
+            };
+
+            // 3. Casos de ALTA PERFORMANCE (Recente e frequente)
+            if (daysSince <= 2 && totalDates > 5) return { 
+                title: genderTerm("A MÁQUINA", "A MÁQUINA"), 
+                desc: "Você não cansa? Haja energia e orçamento pra esse ritmo!" 
+            };
+            if (daysSince <= 7) return { 
+                title: genderTerm("O POPSTAR", "A DIVA"), 
+                desc: "Agenda lotada, paparazzi na porta. Você é o momento." 
+            };
+
+            // 4. Perfis FINANCEIROS
+            if (paidByMe > (totalDates * 0.8) && totalDates > 2) return { 
+                title: genderTerm("SUGAR DADDY", "SUGAR MOMMY"), 
+                desc: "Você banca tudo. O PIB do amor depende de você." 
+            };
+            if (paidByThem > (totalDates * 0.7) && totalDates > 2) return { 
+                title: genderTerm("GIGOLÔ", "GOLPE DO PIX"), 
+                desc: "Sair com você é gain total. Carteira intacta, coração cheio." 
+            };
+            if (split > (totalDates * 0.8)) return { 
+                title: genderTerm("O CONTADOR", "A CONTADORA"), 
+                desc: "Calculadora na mão. 'Faz o pix da sua metade aí'." 
+            };
+
+            // 5. Perfis por QUALIDADE (Rating)
+            if (avgRating >= 4.5 && totalDates > 3) return { 
+                title: "SOMMELIER DE BOCA", 
+                desc: "Padrão de qualidade altíssimo. Só aceita a elite." 
+            };
+            if (avgRating <= 2.0 && totalDates > 2) return { 
+                title: "PARA-RAIO DE LOUCO", 
+                desc: "Você tem um ímã para gente problemática. Cuidado!" 
+            };
+
+            // 6. Perfis por CANCELAMENTO
+            if (cancelled.length > completed.length) return { 
+                title: genderTerm("O FURÃO", "A FUGITIVA"), 
+                desc: "Marca e não vai. O terror dos Ubers." 
+            };
+
+            // 7. Perfis por CATEGORIA/CONTRATO
+            const uniqueContacts = new Set(completed.map(e => e.contactId)).size;
+            
+            if (uniqueContacts === 1 && totalDates > 5) return { 
+                title: genderTerm("O APAIXONADO", "A APAIXONADA"), 
+                desc: "Fiel a uma pessoa só. O casamento tá logo ali?" 
+            };
+            
+            if (uniqueContacts > 5 && (totalDates / uniqueContacts) < 2) return { 
+                title: genderTerm("O DEGUSTADOR", "A DEGUSTADORA"), 
+                desc: "Experimenta de tudo, mas não repete o prato." 
+            };
+
+            // 8. Perfis Específicos
+            if (contacts.filter(c => c.categoria === 'Marmita').length > 3) return {
+                title: genderTerm("REI DO IFOOD", "RAINHA DO IFOOD"),
+                desc: "Mantém vários na reserva pra quando bate a fome."
+            };
+
+            if (contacts.filter(c => c.categoria === 'Ex').length > 2) return {
+                title: "O ARQUEÓLOGO",
+                desc: "Adora desenterrar passado. Supera isso aí!"
+            };
+
+            // Perfis Genéricos/Equilibrados
+            if (totalDates > 15) return { 
+                title: "VETERANO DE GUERRA", 
+                desc: "Já viu de tudo nessa vida. Respeita a patente." 
+            };
+            
+            if (totalDates > 5) return { 
+                title: "JOGADOR CARO", 
+                desc: "Tá na média, jogando o feijão com arroz bem feito." 
+            };
+
+            // Default
+            return { 
+                title: "EM TREINAMENTO", 
+                desc: "Coletando dados para definir sua personalidade." 
+            };
+        }
+
+        function renderPersonaCard(persona) {
+            document.getElementById('persona-title').innerText = persona.title;
+            document.getElementById('persona-desc').innerText = persona.desc;
+        }
+
+        // --- 2. RENDERIZAR MVP ---
+        function renderMVP() {
+            if (contacts.length === 0) return;
+            const sorted = [...contacts].sort((a, b) => (b.encontros || 0) - (a.encontros || 0));
+            const mvp = sorted[0];
+
+            if (!mvp.encontros || mvp.encontros == 0) {
+                document.getElementById('mvp-container').innerHTML = `<p class="text-xs text-gray-500">Sem MVP definido.</p>`;
+                return;
+            }
+
+            document.getElementById('mvp-container').innerHTML = `
+                <div class="flex justify-between items-center">
+                    <h4 class="text-white font-bold text-sm">${mvp.nome}</h4>
+                    <span class="text-[10px] text-yellow-500 font-bold border border-yellow-500/30 px-2 rounded">TOP 1</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">${mvp.encontros} Encontros | Nota: ${mvp.rating}</p>
+            `;
+        }
+
+        // --- 3. GRÁFICOS ---
+        function renderCharts() {
+            const categories = {};
+            contacts.forEach(c => { categories[c.categoria] = (categories[c.categoria] || 0) + 1; });
+
+            const catLabels = Object.keys(categories).length ? Object.keys(categories) : ['Vazio'];
+            const catData = Object.keys(categories).length ? Object.values(categories) : [1];
+            const catColors = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b'];
+
+            new Chart(document.getElementById('chartCategories'), {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{ data: catData, backgroundColor: catColors, borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 9 }, boxWidth: 8 } } }
+                }
+            });
+
+            // Financeiro
+            let payData = { 'Eu': 0, 'Dividido': 0, 'Ela': 0 };
+            events.filter(e => e.status === 'completed').forEach(e => {
+                if(e.pay) payData[e.pay] = (payData[e.pay] || 0) + 1;
+            });
+
+            // Mensagem Financeira
+            const msgEl = document.getElementById('finance-msg');
+            const total = payData['Eu'] + payData['Dividido'] + payData['Ela'];
+            if(total === 0) msgEl.innerText = "Sem dados.";
+            else if(payData['Eu'] > total * 0.7) msgEl.innerText = isFemale ? "Rainha da generosidade!" : "A carteira chora, o coração sorri.";
+            else if(payData['Ela'] > total * 0.7) msgEl.innerText = "Vivendo de favor ou de amor?";
+            else msgEl.innerText = "Equilíbrio financeiro perfeito.";
+
+            new Chart(document.getElementById('chartFinance'), {
+                type: 'bar',
+                data: {
+                    labels: ['Eu', 'Meio', 'Outro'],
+                    datasets: [{
+                        label: 'Qtd',
+                        data: [payData['Eu'], payData['Dividido'], payData['Ela']],
+                        backgroundColor: ['#ef4444', '#3b82f6', '#10b981'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#374151' }, ticks: { color: '#9ca3af', font: {size:8} } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af', font: {size:9} } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // --- 4. INSIGHTS ---
+        function calculateInsights() {
+            /* (Lógica já incorporada no determinePersona) */
+        }
+    </script>
+</body>
+</html>

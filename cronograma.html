@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Na Pista - Cronograma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .hidden-screen { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        body { background-color: #111827; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Barra de Progresso Listrada Animada */
+        .progress-bar-striped {
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 1rem 1rem;
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+        @keyframes progress-bar-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
+    </style>
+</head>
+<body class="min-h-screen relative pb-24 bg-gray-900">
+
+    <div class="max-w-md mx-auto min-h-screen bg-gray-900 shadow-2xl relative fade-in">
+        
+        <div class="bg-gray-800 p-5 rounded-b-3xl shadow-lg border-b border-gray-700 sticky top-0 z-30 flex items-center justify-between">
+            <a href="index.html" class="text-gray-400 hover:text-white transition p-2"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-500">
+                <i class="fa-solid fa-hourglass-half mr-2 text-blue-500"></i>Prazos & Contratos
+            </h1>
+            <div class="w-8"></div> </div>
+
+        <div class="p-5 space-y-6 pb-24">
+            <div id="timeline-list" class="space-y-6">
+                <p class="text-center text-gray-600 text-xs py-10">Carregando contratos...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-date" class="fixed inset-0 bg-black/90 z-50 hidden-screen flex items-center justify-center backdrop-blur-sm fade-in">
+        <div class="bg-gray-900 w-11/12 max-w-sm rounded-3xl p-6 border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h3 class="text-xl font-bold text-white"><i class="fa-regular fa-calendar-days text-blue-500 mr-2"></i>Ajustar Prazos</h3>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Gerenciamento de Tempo</p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <p class="text-xs text-gray-400 mb-6 bg-gray-800 p-2 rounded-lg border border-gray-700">
+                Editando contrato de: <span id="modal-name" class="text-white font-bold ml-1"></span>
+            </p>
+            
+            <input type="hidden" id="edit-id">
+
+            <form id="form-date" class="space-y-5">
+                <div>
+                    <label class="text-[10px] text-green-400 uppercase font-bold ml-1">Início (Obrigatório)</label>
+                    <input type="date" id="date-start" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-green-500 outline-none mt-1 text-sm">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] text-red-400 uppercase font-bold ml-1">Fim Previsto (Opcional)</label>
+                    <input type="date" id="date-end" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-red-500 outline-none mt-1 text-sm">
+                    <p class="text-[9px] text-gray-500 mt-2 flex items-center">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Deixe em branco para contrato indeterminado.
+                    </p>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl text-white font-bold hover:scale-[1.01] transition shadow-lg text-xs uppercase tracking-wide">
+                    Atualizar Vigência
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO (Sincronizada com Index)
+        const APP_KEY_CONTACTS = 'napista_contacts';
+        let contacts = [];
+
+        window.onload = () => {
+            // Verifica se existe usuário, senão volta pro login
+            if(!localStorage.getItem('napista_user')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadContacts();
+        }
+
+        function loadContacts() {
+            contacts = JSON.parse(localStorage.getItem(APP_KEY_CONTACTS) || "[]");
+            renderTimeline();
+        }
+
+        function renderTimeline() {
+            const listEl = document.getElementById('timeline-list');
+            listEl.innerHTML = "";
+
+            if(contacts.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-12 opacity-50 border-2 border-dashed border-gray-700 rounded-2xl">
+                        <i class="fa-solid fa-ghost text-4xl mb-3 text-gray-600"></i>
+                        <p class="text-sm font-bold">Nenhum contrato ativo.</p>
+                        <p class="text-xs mt-1">Cadastre alguém na tela inicial.</p>
+                    </div>`;
+                return;
+            }
+
+            // Ordenação Inteligente:
+            // 1. Quem tem data de fim (urgência)
+            // 2. Quem não tem (indeterminado)
+            contacts.sort((a, b) => {
+                if(!a.dataFim && !b.dataFim) return 0;
+                if(!a.dataFim) return 1;
+                if(!b.dataFim) return -1;
+                return new Date(a.dataFim) - new Date(b.dataFim);
+            });
+
+            contacts.forEach(c => {
+                if(!c.dataInicio) return; // Pula se estiver sem data (erro)
+
+                const start = new Date(c.dataInicio);
+                const end = c.dataFim ? new Date(c.dataFim) : null;
+                const now = new Date();
+
+                // Cálculos de Tempo (Juntos há quanto tempo)
+                const diffTime = Math.abs(now - start);
+                const daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                let statusHTML = "";
+                let progressHTML = "";
+                let daysLeftText = "";
+                let cardBorder = "border-gray-700"; // Borda padrão
+                
+                if (end) {
+                    // --- CONTRATO COM PRAZO ---
+                    const totalDuration = end - start;
+                    const elapsed = now - start;
+                    let percent = (elapsed / totalDuration) * 100;
+                    
+                    // Dias Restantes
+                    const msLeft = end - now;
+                    const daysLeft = Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+
+                    // Definição de Cores e Alertas
+                    let colorClass = "bg-blue-500";
+                    let msg = "Em andamento";
+
+                    if (daysLeft < 0) {
+                        // EXPIROU
+                        percent = 100;
+                        colorClass = "bg-red-600 progress-bar-striped";
+                        msg = "CONTRATO VENCIDO";
+                        cardBorder = "border-red-900"; // Borda vermelha
+                        daysLeftText = `<span class="text-red-500 font-bold uppercase text-[9px] bg-red-900/20 px-1 rounded">Venceu há ${Math.abs(daysLeft)} dias</span>`;
+                    } else if (daysLeft <= 7) {
+                        // CRÍTICO (Menos de uma semana)
+                        colorClass = "bg-yellow-500 progress-bar-striped";
+                        msg = "RETA FINAL";
+                        cardBorder = "border-yellow-600"; // Borda amarela
+                        daysLeftText = `<span class="text-yellow-400 font-bold text-[9px] bg-yellow-900/20 px-1 rounded">Faltam ${daysLeft} dias</span>`;
+                    } else {
+                        // TRANQUILO
+                        colorClass = "bg-green-500";
+                        daysLeftText = `<span class="text-gray-400 text-[9px]">Restam ${daysLeft} dias</span>`;
+                    }
+
+                    progressHTML = `
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-2 overflow-hidden border border-gray-600 shadow-inner">
+                            <div class="${colorClass} h-2 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,0,0,0.5)]" style="width: ${Math.min(percent, 100)}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] text-gray-500 uppercase tracking-wider font-bold">${msg}</span>
+                            ${daysLeftText}
+                        </div>
+                    `;
+                } else {
+                    // --- CONTRATO INDETERMINADO ---
+                    progressHTML = `
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-2 overflow-hidden border border-gray-600 flex relative shadow-inner">
+                            <div class="absolute inset-0 flex items-center justify-center text-[7px] text-gray-400 tracking-[0.2em] uppercase font-bold z-10">Vitalício / Indefinido</div>
+                            <div class="bg-purple-600 h-2 w-full opacity-30"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] text-purple-400 uppercase tracking-wider font-bold">Modo Livre</span>
+                            <span class="text-[9px] text-gray-400"><i class="fa-solid fa-infinity mr-1"></i>Sem prazo</span>
+                        </div>
+                    `;
+                    cardBorder = "border-purple-900/50";
+                }
+
+                // Renderizar Card
+                const card = `
+                    <div class="bg-gray-800 p-5 rounded-2xl border ${cardBorder} shadow-xl relative group transition hover:scale-[1.01]">
+                        <button onclick="editDate(${c.id})" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-gray-900 border border-gray-700 hover:border-blue-500 p-2 rounded-lg text-xs transition shadow-md">
+                            <i class="fa-solid fa-pen"></i> <span class="hidden sm:inline ml-1">Editar</span>
+                        </button>
+
+                        <div class="flex items-center mb-5">
+                            <img src="${c.foto}" class="w-14 h-14 rounded-full border-2 border-gray-600 mr-4 object-cover shadow-lg">
+                            <div>
+                                <h3 class="text-white font-bold text-lg leading-tight">${c.nome}</h3>
+                                <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wide bg-gray-900 px-2 py-0.5 rounded-md inline-block">
+                                    <i class="fa-regular fa-calendar text-blue-400 mr-1"></i> Ativo há <span class="text-white font-bold">${daysActive} dias</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-800 shadow-inner">
+                            ${progressHTML}
+                        </div>
+
+                        <div class="flex justify-between mt-3 text-[9px] text-gray-500 font-mono border-t border-gray-700/50 pt-2">
+                            <span><i class="fa-solid fa-play text-green-800 mr-1"></i>INÍCIO: ${formatDateBR(c.dataInicio)}</span>
+                            <span><i class="fa-solid fa-stop text-red-900 mr-1"></i>FIM: ${c.dataFim ? formatDateBR(c.dataFim) : '---'}</span>
+                        </div>
+                    </div>
+                `;
+                listEl.innerHTML += card;
+            });
+        }
+
+        // --- MANIPULAÇÃO DO MODAL ---
+        function editDate(id) {
+            const c = contacts.find(contact => contact.id == id);
+            document.getElementById('edit-id').value = c.id;
+            document.getElementById('modal-name').innerText = c.nome;
+            document.getElementById('date-start').value = c.dataInicio;
+            document.getElementById('date-end').value = c.dataFim || "";
+            
+            document.getElementById('modal-date').classList.remove('hidden-screen');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-date').classList.add('hidden-screen');
+        }
+
+        document.getElementById('form-date').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const idx = contacts.findIndex(c => c.id == id);
+
+            if (idx > -1) {
+                contacts[idx].dataInicio = document.getElementById('date-start').value;
+                contacts[idx].dataFim = document.getElementById('date-end').value; // Pode ser vazio
+                
+                localStorage.setItem(APP_KEY_CONTACTS, JSON.stringify(contacts));
+                closeModal();
+                renderTimeline();
+            }
+        });
+
+        // Helper Data BR
+        function formatDateBR(dateString) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year.slice(2)}`;
+        }
+    </script>
+</body>
+</html>

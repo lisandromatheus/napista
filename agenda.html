@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Na Pista - Agenda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .hidden-screen { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        body { background-color: #111827; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen relative pb-24 bg-gray-900">
+
+    <div class="max-w-md mx-auto min-h-screen bg-gray-900 shadow-2xl relative fade-in">
+        
+        <div class="bg-gray-800 p-5 rounded-b-3xl shadow-lg border-b border-gray-700 sticky top-0 z-30">
+            <div class="flex items-center justify-between mb-3">
+                <a href="index.html" class="text-gray-400 hover:text-white transition p-2"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+                <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+                    <i class="fa-regular fa-calendar-check mr-2 text-pink-500"></i>Agenda
+                </h1>
+                <button onclick="openModalEvent()" class="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 py-1.5 rounded-xl text-xs font-bold shadow hover:scale-105 transition uppercase tracking-wide">
+                    <i class="fa-solid fa-plus mr-1"></i> Novo
+                </button>
+            </div>
+            
+            <div id="box-permission" class="hidden bg-gray-700/50 border border-gray-600 p-3 rounded-xl mt-2 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-bell text-yellow-500 mr-2 text-xs"></i>
+                    <span class="text-xs text-gray-300">Ativar lembretes?</span>
+                </div>
+                <button onclick="requestNotificationPermission()" class="text-[10px] bg-gray-800 border border-gray-600 hover:bg-pink-600 hover:border-pink-600 text-white px-3 py-1 rounded transition uppercase font-bold">Ativar</button>
+            </div>
+            
+            <p class="text-[9px] text-gray-600 text-center mt-2 uppercase tracking-widest">Sincronizado com dispositivo local</p>
+        </div>
+
+        <div class="p-5 space-y-8 pb-32">
+            
+            <div>
+                <h3 class="text-[10px] font-bold text-blue-400 uppercase mb-4 tracking-widest flex items-center border-b border-gray-800 pb-2">
+                    <i class="fa-solid fa-plane-departure mr-2"></i> Próximos Rolês
+                </h3>
+                <div id="agenda-upcoming" class="space-y-4 min-h-[50px]">
+                    <p class="text-center text-gray-600 text-xs italic py-4">Carregando...</p>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest flex items-center border-b border-gray-800 pb-2 pt-4">
+                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> Histórico Recente
+                </h3>
+                <div id="agenda-history" class="space-y-3 opacity-60 hover:opacity-100 transition duration-300">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-event" class="fixed inset-0 bg-black/90 z-50 hidden-screen flex items-end sm:items-center justify-center backdrop-blur-sm fade-in">
+        <div class="bg-gray-900 w-full max-w-md rounded-t-3xl sm:rounded-2xl p-6 border border-gray-700 shadow-2xl">
+            <div class="flex justify-between items-center mb-1">
+                <h3 class="text-xl font-bold text-white">Marcar Encontro</h3>
+                <button onclick="document.getElementById('modal-event').classList.add('hidden-screen')" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-gray-500 mb-6 uppercase tracking-wider">Prepare o terreno.</p>
+            
+            <form id="form-event" class="space-y-5">
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Com quem?</label>
+                    <div class="relative mt-1">
+                        <select id="evt-contact" required class="w-full p-3 pl-10 bg-gray-800 border border-gray-700 rounded-xl text-white appearance-none focus:border-pink-500 focus:outline-none text-sm"></select>
+                        <i class="fa-solid fa-user absolute left-3 top-3.5 text-gray-500 text-xs"></i>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-3.5 text-gray-500 text-xs"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Data</label>
+                        <input type="date" id="evt-date" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-pink-500 focus:outline-none text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Hora</label>
+                        <input type="time" id="evt-time" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-pink-500 focus:outline-none text-sm mt-1">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Local / Rolê</label>
+                    <div class="relative mt-1">
+                        <input type="text" id="evt-local" placeholder="Ex: Cinema, Jantar, Casa dela..." class="w-full p-3 pl-10 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-pink-500 focus:outline-none text-sm">
+                        <i class="fa-solid fa-location-dot absolute left-3 top-3.5 text-gray-500 text-xs"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl text-white font-bold hover:scale-[1.01] transition shadow-lg mt-2 uppercase text-xs tracking-wider">
+                    Confirmar Agendamento
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="fixed inset-0 bg-black/95 z-50 hidden-screen flex items-center justify-center backdrop-blur-md fade-in">
+        <div class="bg-gray-800 w-11/12 max-w-sm rounded-3xl p-6 border border-gray-600 text-center shadow-2xl relative">
+            
+            <div class="mb-4">
+                <div class="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 border-2 border-pink-500">
+                    <i class="fa-solid fa-question text-3xl text-pink-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">E aí, rolou?</h3>
+                <p class="text-gray-400 text-xs mt-1">O encontro com <span id="conf-name" class="text-pink-400 font-bold"></span> aconteceu?</p>
+            </div>
+            
+            <input type="hidden" id="conf-id">
+            
+            <div id="step-1" class="grid grid-cols-2 gap-3">
+                <button onclick="confirmarRolou(false)" class="p-3 rounded-xl border border-gray-600 text-gray-400 hover:bg-gray-700 transition text-xs font-bold uppercase">
+                    <i class="fa-solid fa-xmark block text-xl mb-1"></i> Não / Cancelado
+                </button>
+                <button onclick="showReview()" class="p-3 rounded-xl bg-green-600 text-white hover:bg-green-500 transition shadow-lg shadow-green-900/50 text-xs font-bold uppercase">
+                    <i class="fa-solid fa-check block text-xl mb-1"></i> Sim, Rolou!
+                </button>
+            </div>
+
+            <div id="step-2" class="hidden text-left bg-gray-900 p-4 rounded-2xl border border-gray-700 animate-fade-in">
+                <div class="mb-3">
+                    <label class="text-[10px] text-gray-400 uppercase font-bold">Como foi a experiência?</label>
+                    <select id="conf-rating" class="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white mt-1 text-sm focus:outline-none">
+                        <option value="Incrível">🔥 Incrível (5/5)</option>
+                        <option value="Bom">🙂 Bom, normal</option>
+                        <option value="Razoável">😐 Razoável / Meh</option>
+                        <option value="Ruim">💀 Ruim</option>
+                        <option value="Desastre">🚩 Desastre Total</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="text-[10px] text-gray-400 uppercase font-bold">Quem pagou a conta?</label>
+                    <select id="conf-pay" class="w-full p-2 bg-gray-800 border border-gray-600 rounded-lg text-white mt-1 text-sm focus:outline-none">
+                        <option value="Eu">Eu paguei tudo (Gado?)</option>
+                        <option value="Dividido">Dividimos (Justo)</option>
+                        <option value="Ela">Ela pagou (Gain total)</option>
+                    </select>
+                </div>
+
+                <button onclick="confirmarRolou(true)" class="w-full py-3 bg-pink-600 rounded-xl text-white font-bold text-xs hover:bg-pink-500 uppercase tracking-wide">
+                    Salvar Estatísticas
+                </button>
+            </div>
+            
+            <button onclick="document.getElementById('modal-confirm').classList.add('hidden-screen')" class="mt-6 text-[10px] text-gray-500 hover:text-gray-300 underline uppercase tracking-widest">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO DE CHAVES (IGUAL AO INDEX)
+        const APP_KEY_USER = 'napista_user';
+        const APP_KEY_CONTACTS = 'napista_contacts';
+        const APP_KEY_EVENTS = 'napista_events';
+
+        let contacts = [];
+        let events = [];
+        
+        // --- INICIALIZAÇÃO ---
+        window.onload = () => {
+            if(!localStorage.getItem(APP_KEY_USER)) {
+                window.location.href = 'index.html';
+                return;
+            }
+            loadData();
+            renderAgenda();
+            checkNotificationPermission();
+            
+            // Loop de notificação (60s)
+            setInterval(checkReminders, 60000);
+        }
+
+        // --- DADOS ---
+        function loadData() {
+            contacts = JSON.parse(localStorage.getItem(APP_KEY_CONTACTS) || "[]");
+            events = JSON.parse(localStorage.getItem(APP_KEY_EVENTS) || "[]");
+        }
+        function saveData() {
+            localStorage.setItem(APP_KEY_CONTACTS, JSON.stringify(contacts));
+            localStorage.setItem(APP_KEY_EVENTS, JSON.stringify(events));
+        }
+
+        // --- RENDERIZAÇÃO ---
+        function renderAgenda() {
+            const upEl = document.getElementById('agenda-upcoming');
+            const histEl = document.getElementById('agenda-history');
+            upEl.innerHTML = ""; histEl.innerHTML = "";
+            
+            // Ordenar por data
+            events.sort((a, b) => new Date(a.date+'T'+a.time) - new Date(b.date+'T'+b.time));
+
+            const now = new Date();
+            let hasUpcoming = false;
+
+            if(events.length === 0) {
+                upEl.innerHTML = `
+                    <div class="text-center py-8 border-2 border-dashed border-gray-700 rounded-2xl bg-gray-800/30">
+                        <i class="fa-regular fa-calendar-xmark text-3xl text-gray-600 mb-2"></i>
+                        <p class="text-gray-500 text-xs">Nenhum date marcado.</p>
+                        <p class="text-[10px] text-gray-600">Bora marcar algo?</p>
+                    </div>`;
+            }
+
+            events.forEach(evt => {
+                const evtDate = new Date(evt.date + 'T' + evt.time);
+                const dia = evtDate.toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
+                
+                // Cores de Status
+                let statusClass = "border-gray-700";
+                let iconStatus = "";
+                
+                if (evt.status === 'completed') { 
+                    statusClass = "border-green-800 bg-green-900/10"; 
+                    iconStatus = '<span class="bg-green-900 text-green-400 text-[9px] px-1.5 py-0.5 rounded border border-green-700">REALIZADO</span>'; 
+                }
+                else if (evt.status === 'cancelled') { 
+                    statusClass = "border-red-900 bg-red-900/10 opacity-60"; 
+                    iconStatus = '<span class="bg-red-900 text-red-400 text-[9px] px-1.5 py-0.5 rounded border border-red-700">CANCELADO</span>'; 
+                }
+                else { 
+                    statusClass = "border-pink-500/30 bg-gray-800"; 
+                    iconStatus = '<span class="bg-blue-900 text-blue-400 text-[9px] px-1.5 py-0.5 rounded border border-blue-700">AGENDADO</span>';
+                }
+
+                const html = `
+                    <div class="p-4 rounded-2xl border ${statusClass} flex items-center relative shadow-lg transition hover:scale-[1.01]">
+                        <div class="bg-gray-900 rounded-xl p-2 text-center mr-4 w-14 border border-gray-600 flex flex-col justify-center shadow-inner">
+                            <span class="text-[10px] text-pink-500 font-bold uppercase leading-none mb-1">${dia}</span>
+                            <span class="text-white font-bold text-sm leading-none">${evt.time}</span>
+                        </div>
+                        
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-white font-bold text-sm">${evt.contactName}</h4>
+                                ${iconStatus}
+                            </div>
+                            <p class="text-gray-400 text-xs mt-1 flex items-center">
+                                <i class="fa-solid fa-location-dot mr-1.5 text-[10px] text-gray-600"></i>${evt.location || 'Sem local'}
+                            </p>
+                            
+                            ${evt.status === 'completed' ? `<p class="text-[10px] text-green-400 mt-1 bg-green-900/20 inline-block px-1 rounded">Nota: <b>${evt.review}</b></p>` : ''}
+                        </div>
+                        
+                        ${evt.status === 'scheduled' ? `
+                        <button onclick="triggerConfirm(${evt.id}, '${evt.contactName}')" class="ml-3 bg-gray-700 hover:bg-green-600 text-gray-400 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition shadow-lg border border-gray-600 group">
+                            <i class="fa-solid fa-check text-lg group-hover:scale-110 transition"></i>
+                        </button>` : ''}
+                    </div>
+                `;
+                
+                if(evt.status === 'scheduled') {
+                    upEl.innerHTML += html;
+                    hasUpcoming = true;
+                } else {
+                    histEl.insertAdjacentHTML('afterbegin', html);
+                }
+            });
+            
+            if(!hasUpcoming && events.length > 0) upEl.innerHTML = `<p class="text-center text-gray-600 text-[10px] italic py-2">Nada pendente.</p>`;
+        }
+
+        // --- MODAL DE CRIAÇÃO ---
+        function openModalEvent() {
+            const select = document.getElementById('evt-contact');
+            select.innerHTML = "";
+            
+            if(contacts.length === 0) { 
+                alert("Você precisa adicionar contatos na tela inicial antes de marcar dates!"); 
+                window.location.href = 'index.html';
+                return; 
+            }
+            
+            contacts.forEach(c => {
+                const opt = document.createElement('option'); 
+                opt.value = c.id; 
+                opt.text = c.nome; 
+                select.appendChild(opt);
+            });
+            
+            document.getElementById('modal-event').classList.remove('hidden-screen');
+            document.getElementById('evt-date').valueAsDate = new Date();
+        }
+
+        document.getElementById('form-event').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const contactId = document.getElementById('evt-contact').value;
+            const contact = contacts.find(c => c.id == contactId);
+            
+            const newEvt = {
+                id: Date.now(),
+                contactId: contactId,
+                contactName: contact.nome,
+                date: document.getElementById('evt-date').value,
+                time: document.getElementById('evt-time').value,
+                location: document.getElementById('evt-local').value,
+                status: 'scheduled',
+                review: '',
+                pay: '',
+                notified_2h: false,
+                notified_now: false
+            };
+            events.push(newEvt);
+            saveData();
+            document.getElementById('modal-event').classList.add('hidden-screen');
+            renderAgenda();
+        });
+
+        // --- LÓGICA DE CONFIRMAÇÃO ---
+        window.triggerConfirm = (id, name) => {
+            document.getElementById('conf-id').value = id;
+            document.getElementById('conf-name').innerText = name;
+            
+            // Reseta visual do modal
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            
+            document.getElementById('modal-confirm').classList.remove('hidden-screen');
+        }
+
+        window.showReview = () => {
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-2').classList.remove('hidden');
+        }
+
+        window.confirmarRolou = (rolou) => {
+            const id = document.getElementById('conf-id').value;
+            const idx = events.findIndex(e => e.id == id);
+            
+            if(idx > -1) {
+                if(rolou) {
+                    // 1. Atualiza evento
+                    events[idx].status = 'completed';
+                    events[idx].review = document.getElementById('conf-rating').value;
+                    events[idx].pay = document.getElementById('conf-pay').value;
+                    
+                    // 2. ATUALIZA O CONTATO (IMPORTANTE)
+                    const cIdx = contacts.findIndex(c => c.id == events[idx].contactId);
+                    if(cIdx > -1) {
+                        let currentCount = parseInt(contacts[cIdx].encontros) || 0;
+                        contacts[cIdx].encontros = currentCount + 1;
+                    }
+                } else {
+                    events[idx].status = 'cancelled';
+                }
+                
+                saveData(); // Persiste nos 2 bancos
+                renderAgenda();
+            }
+            document.getElementById('modal-confirm').classList.add('hidden-screen');
+        }
+
+        // --- NOTIFICAÇÕES (LÓGICA) ---
+        function checkNotificationPermission() {
+            if (!("Notification" in window)) {
+                // Navegador não suporta
+            } else if (Notification.permission === "granted") {
+                document.getElementById('box-permission').classList.add('hidden');
+            } else if (Notification.permission !== "denied") {
+                document.getElementById('box-permission').classList.remove('hidden');
+            }
+        }
+
+        function requestNotificationPermission() {
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    document.getElementById('box-permission').classList.add('hidden');
+                    new Notification("Na Pista", { body: "Lembretes ativados com sucesso!" });
+                }
+            });
+        }
+
+        function checkReminders() {
+            const now = new Date();
+            
+            events.forEach(evt => {
+                if(evt.status !== 'scheduled') return;
+
+                const evtDate = new Date(evt.date + 'T' + evt.time);
+                const diffMs = evtDate - now;
+                const diffMin = diffMs / 1000 / 60; 
+
+                // Lembrete 2 Horas
+                if(diffMin > 115 && diffMin < 125 && !evt.notified_2h) {
+                    sendNotification(`🚿 Banho Premium!`, `Faltam 2h para o date com ${evt.contactName}. Comece a se arrumar.`);
+                    evt.notified_2h = true;
+                    saveData();
+                }
+
+                // Lembrete Na Hora
+                if(diffMin > -5 && diffMin < 5 && !evt.notified_now) {
+                    sendNotification(`🍀 Hora do Show!`, `Bom encontro com ${evt.contactName}. Juízo!`);
+                    evt.notified_now = true;
+                    saveData();
+                }
+            });
+        }
+
+        function sendNotification(title, body) {
+            if (Notification.permission === "granted") {
+                // Tenta usar ícone padrão se disponível ou genérico
+                new Notification(title, { body: body });
+            }
+        }
+    </script>
+</body>
+</html>
