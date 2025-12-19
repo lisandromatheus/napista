@@ -38,6 +38,20 @@
         /* Scrollbar Fina */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        /* Badge de Privacidade */
+.privacy-shield {
+    background: linear-gradient(180deg, rgba(31, 41, 55, 0.3) 0%, rgba(17, 24, 39, 0.9) 100%);
+    border: 1px solid rgba(75, 85, 99, 0.4);
+    transition: all 0.3s ease;
+}
+.privacy-shield:hover {
+    border-color: #10b981; /* Verde Matrix */
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    transform: translateY(-2px);
+}
+.privacy-icon {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
     </style>
 </head>
 <body class="min-h-screen relative pb-24 bg-gray-900">
@@ -134,7 +148,15 @@
             <div id="contacts-list" class="space-y-4">
                 </div>
         </div>
-
+<div class="mt-6 mb-24 mx-4 p-5 rounded-2xl privacy-shield text-center backdrop-blur-sm">
+    <i class="fa-solid fa-user-secret text-3xl text-green-500 mb-3 privacy-icon"></i>
+    <h4 class="text-xs font-bold text-gray-200 uppercase tracking-widest mb-1">Cofre Local Blindado</h4>
+    <p class="text-[10px] text-gray-500 leading-relaxed px-2">
+        Pode ficar tranquilo(a). Seus dados são salvos 100% na <strong>memória do seu navegador</strong>. 
+        Nada é enviado para a nuvem. Seus segredos não saem do seu bolso.
+        <br><span class="text-green-600 font-bold italic mt-1 block">"O que acontece na pista, fica na pista."</span>
+    </p>
+</div>
         <button onclick="openModal()" class="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full shadow-2xl text-white text-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition z-40 border-2 border-white/10">
             <i class="fa-solid fa-plus"></i>
         </button>
